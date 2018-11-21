@@ -1,0 +1,171 @@
+General info
+------------
+
+The data structure used to calculate these percentages is a suffix tree with occurrence number on every edge.
+These occurrence numbers are calculated from the same suffix tree by a recursive walk.
+
+
+Build
+-----
+
+To build the software, you need: cmake g++ make
+
+Commands in the program dirrectory:
+$ cd build
+$ cmake ..
+$ make
+
+
+Testing strategies for program counting substring occurrence percentage in text
+-------------------------------------------------------------------------------
+
+
+1) The first test is to use simple strings, for which you can easily calculate results yourself.
+One can use strings like:
+hall feels heels
+aaaa
+aaaaa
+aaaaaa
+abab
+ababa
+ababab
+ababa hall feels heels
+
+
+2)The other approach is to concatenate several same strings with spaces between them to see if percentages chage or not.
+They shouldn't change for a correct algorithm.  
+
+For this approach program `generator1` is used. 
+It is given a string pattern and a number of times to repeat it.
+
+You can feed strings from point 1 to it. 
+Or use random strings (with spaces in the end) and see that percentages do not change.
+
+One can also use strings of single letter, written N times, to observe that change of percentages does happen with changing of N.
+
+
+3)A more sophisticated approach is to have several words, written in random order N times with spaces between them.
+
+For this approach program `generator2` is used.
+It is given several string pattern and a number of times to repeat them in random order.
+
+When strings have spaces in the end, they can be seen as separate words. 
+Thus percentages should not change with checnge of N.
+
+
+4) Another approach is to generate random strings and see 
+if results of suffix tree computation coinside with those for naive computation approach.
+
+This approach is used in `test` executable and a python2 script `counter.py`.
+
+Program `test` performs computations without any input from the user, like a unut test.
+
+Program `counter.py` performs naive computation on any given file.
+
+
+
+Programs usage examples
+---------------------------
+
+./counter <file> 			- Calculates the top 10 frequent substrings in words longer than 3 in a given file
+./generator1 N string 			- Repeats same string N times
+./generator2 N string1 .. stringM	- repeats given strings in random order N times
+python ../counter.py <file> 		- prints frequency of substrings in words longer than 3 in a given file
+
+
+The line:
+ababa hall feels heels
+should make numberof occurrences 10 times the number of repeats:
+
+Here N=170, you can play with it to see that results do not differ.
+
+$ ./generator2 170 'ababa ' 'hall ' 'feels ' 'heels  ' > file4.txt ; ls -alh file4.txt 
+-rw-rw-r-- 1 paul paul 4.0K Nov 19 11:22 file4.txt
+
+Call script to see corrent results:
+
+$ python ../counter.py file4.txt 
+Number of substrings onger than 3 is:  1700.0 
+(0, 20.0, 'eels')
+(1, 10.0, 'heels')
+(2, 10.0, 'heel')
+(3, 10.0, 'hall')
+(4, 10.0, 'feels')
+(5, 10.0, 'feel')
+(6, 10.0, 'baba')
+(7, 10.0, 'ababa')
+(8, 10.0, 'abab')
+
+Command and output:
+
+$ ./counter file4.txt                        
+Reading file 'file4.txt'
+Suffix tree constructed.
+Performing computation of top 10 substrings longer or equal to 4 by occurrence frequency.
+
+Number of substrings longer or equal to 4 is: 1700
+
++----+---------+-------------------------------+
+|  Id|Substring|                     Percentage|
++----+---------+-------------------------------+
+|   0|     eels|                            20%|
++----+---------+-------------------------------+
+|   1|     heel|                            10%|
++----+---------+-------------------------------+
+|   2|    heels|                            10%|
++----+---------+-------------------------------+
+|   3|     hall|                            10%|
++----+---------+-------------------------------+
+|   4|     feel|                            10%|
++----+---------+-------------------------------+
+|   5|    feels|                            10%|
++----+---------+-------------------------------+
+|   6|     baba|                            10%|
++----+---------+-------------------------------+
+|   7|     abab|                            10%|
++----+---------+-------------------------------+
+|   8|    ababa|                            10%|
++----+---------+-------------------------------+
+
+Frequency difference horizontal bar chart:
+
+    | Minimal %                                                          | Maximal %
+Id  |0                                                                   |20
+----+--------------------------------------------------------------------+------------------------------
+0   |####################################################################| 20%
+1   |#################################| 10%
+2   |#################################| 10%
+3   |#################################| 10%
+4   |#################################| 10%
+5   |#################################| 10%
+6   |#################################| 10%
+7   |#################################| 10%
+8   |#################################| 10%
+
+
+
+Another example:
+
+Try this with different repeat numbers:
+
+$ ./generator2 170 'aaaa ' > file4.txt ; ls -alh file4.txt 
+-rw-rw-r-- 1 paul paul 850 Nov 19 11:25 file4.txt
+
+$ python ../suffix_tree/counter.py file4.txt 
+Number of substrings onger than 3 is:  170.0
+(0, 100.0, 'aaaa')
+
+$ ./counter file4.txt 
+Reading file 'file4.txt'
+Suffix tree constructed.
+Performing computation of top 10 substrings longer or equal to 4 by occurrence frequency.
+
+Number of substrings longer or equal to 4 is: 70
+
++----+---------+-------------------------------+
+|  Id|Substring|                     Percentage|
++----+---------+-------------------------------+
+|   0|     aaaa|                           100%|
++----+---------+-------------------------------+
+
+Only one result, nothing to show on a chart
